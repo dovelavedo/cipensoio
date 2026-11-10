@@ -109,6 +109,8 @@ td button{min-height:36px;padding:2px 10px}
       <label><input type="checkbox" id="sBets"> Annuncia le puntate degli altri</label>
       <label><input type="checkbox" id="sMyBets"> Annuncia le mie puntate</label>
       <label><input type="checkbox" id="sPot"> Annuncia ogni variazione del piatto</label>
+      <label><input type="checkbox" id="sMade"> Dì il punto che ho in mano (per esempio «coppia di re»)</label>
+      <label><input type="checkbox" id="sPotIncl"> Il piatto mostrato dal sito comprende già le puntate in corso</label>
     </div>
   </details>
 
@@ -147,7 +149,28 @@ const RANK_NAME={A:'asso',2:'due',3:'tre',4:'quattro',5:'cinque',6:'sei',7:'sett
 const SUIT_NAME={c:'cuori',q:'quadri',f:'fiori',p:'picche'};
 const SUIT_SYM={c:'♥',q:'♦',f:'♣',p:'♠'};
 const cardRank=c=>c.slice(0,-1), cardSuit=c=>c.slice(-1);
-const cardName=c=>RANK_NAME[cardRank(c)]+' di '+SUIT_NAME[cardSuit(c)];
+const cardName=c=>RANK_NAME[cardRank(c)]+' '+SUIT_NAME[cardSuit(c)];
+/* Punto in mano: descrive la combinazione migliore tra le proprie carte e il tavolo (nessun consiglio). */
+const PLUR={14:'assi',13:'re',12:'donne',11:'jack',10:'dieci',9:'nove',8:'otto',7:'sette',6:'sei',5:'cinque',4:'quattro',3:'tre',2:'due'};
+const SING={14:'asso',13:'re',12:'donna',11:'jack',10:'dieci',9:'nove',8:'otto',7:'sette',6:'sei',5:'cinque',4:'quattro',3:'tre',2:'due'};
+const AL={14:"all'asso",13:'al re',12:'alla donna',11:'al jack',10:'al dieci',9:'al nove',8:"all'otto",7:'al sette',6:'al sei',5:'al cinque'};
+function handName(cards){
+  const val=c=>{const r=cardRank(c);return r==='A'?14:RANKS.indexOf(r)+1;};
+  const straight=vs=>{const set=new Set(vs);if(set.has(14))set.add(1);for(let h=14;h>=5;h--){let ok=true;for(let k=0;k<5;k++)if(!set.has(h-k)){ok=false;break;}if(ok)return h;}return 0;};
+  const cnt={},bySuit={};
+  for(const c of cards){const v=val(c);cnt[v]=(cnt[v]||0)+1;(bySuit[cardSuit(c)]=bySuit[cardSuit(c)]||[]).push(v);}
+  const flush=Object.values(bySuit).find(a=>a.length>=5);
+  if(flush){const h=straight(flush);if(h)return h===14?'scala reale':'scala colore '+AL[h];}
+  const g=Object.keys(cnt).map(Number).sort((a,b)=>cnt[b]-cnt[a]||b-a);
+  if(cnt[g[0]]===4)return 'poker di '+PLUR[g[0]];
+  if(cnt[g[0]]===3&&cnt[g[1]]>=2)return `full di ${PLUR[g[0]]} e ${PLUR[g[1]]}`;
+  if(flush)return 'colore';
+  const h=straight(g);if(h)return 'scala '+AL[h];
+  if(cnt[g[0]]===3)return 'tris di '+PLUR[g[0]];
+  if(cnt[g[0]]===2&&cnt[g[1]]===2)return `doppia coppia ${PLUR[g[0]]} e ${PLUR[g[1]]}`;
+  if(cnt[g[0]]===2)return 'coppia di '+PLUR[g[0]];
+  return 'carta alta '+SING[Math.max(...g)];
+}
 const listIt=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' e '+a[a.length-1];
 const ORD=['','primo','secondo','terzo','quarto','quinto','sesto','settimo','ottavo','nono'];
 
@@ -355,7 +378,7 @@ function buildFontTemplates(){
 /* ================= profili e impostazioni ================= */
 const LS='lettorePoker.v1';
 const saved=(()=>{try{return JSON.parse(localStorage.getItem(LS))||{};}catch(e){return {};}})();
-const settings=Object.assign({voice:true,aria:false,rate:1.3,fps:7,bets:true,myBets:true,pot:false},saved.settings);
+const settings=Object.assign({voice:true,aria:false,rate:1.5,fps:7,bets:true,myBets:true,pot:false,potIncl:false,made:true},saved.settings);
 const userProfile=Object.assign({seats:6,regions:{},sig:{turn:null,button:null}},saved.profile);
 let userTemplates=saved.templates||[];
 let P=userProfile;
@@ -546,9 +569,11 @@ function positionInfo(){
   const ord=(i)=>i===n?'ultimo':ORD[i];
   const a=pre.indexOf(1)+1,b=post.indexOf(1)+1;
   const short=`${role?role.replace('Sei ','')+', ':''}${ord(a)} prima del flop, ${ord(b)} dopo`;
-  const text=`${n} giocatori. ${role?role+'. ':''}Prima del flop parli per ${ord(a)}, dopo il flop per ${ord(b)}.`;
+  const text=`${n} giocatori. ${role?role+'. ':''}Prima del flop ${ord(a)}, dopo ${ord(b)}.`;
   return {n,sb,bb,text,short};
 }
+function madeText(){const b=boardCards();return settings.made&&C.hero1&&C.hero2&&b.length>=3?handName([C.hero1,C.hero2,...b]):'';}
+function totalPot(){let t=C.pot||0;if(!settings.potIncl)for(let s=1;s<=P.seats;s++)t+=C[`seat${s}_bet`]||0;return t;}
 function boardCards(){const b=[];for(let i=1;i<=5;i++){const c=C['board'+i];if(!c)break;b.push(c);}return b;}
 function process(raw){
   const ch={};
@@ -567,18 +592,18 @@ function process(raw){
   const h1=C.hero1,h2=C.hero2;
   if(h1&&h2){
     const key=h1+' '+h2;
-    if(key!==hand.heroKey){hand={heroKey:key,board:0,posPending:true,pos:null};say(`Nuova mano. Le tue carte: ${cardName(h1)} e ${cardName(h2)}.`,2);}
+    if(key!==hand.heroKey){hand={heroKey:key,board:0,posPending:true,pos:null};say(`Mano nuova: ${cardName(h1)}, ${cardName(h2)}.`,2);}
   }else if(!h1&&!h2)hand.heroKey=null;
   if(hand.posPending&&C.button){const info=positionInfo();if(info){hand.pos=info;hand.posPending=false;say(info.text,1);}}
   // carte comuni
   const b=boardCards(),n=b.length;
   if(n===0)hand.board=0;
   else if(n>=3&&n>hand.board){
-    const pot=C.pot?` Piatto ${money(C.pot)}.`:'';
-    if(hand.board===0&&n===3)say(`Flop: ${listIt(b.map(cardName))}.${pot}`,2);
+    const pot=(madeText()?` Hai ${madeText()}.`:'')+(C.pot?` Piatto ${money(C.pot)}.`:'');
+    if(hand.board===0&&n===3)say(`Flop: ${b.map(cardName).join(', ')}.${pot}`,2);
     else if(hand.board===3&&n===4)say(`Turn: ${cardName(b[3])}.${pot}`,2);
     else if(hand.board===4&&n===5)say(`River: ${cardName(b[4])}.${pot}`,2);
-    else say(`Sul tavolo: ${listIt(b.map(cardName))}.${pot}`,2);
+    else say(`Sul tavolo: ${b.map(cardName).join(', ')}.${pot}`,2);
     hand.board=n;hand.posPending=false;
   }
   // puntate
@@ -591,10 +616,10 @@ function process(raw){
     if(!v||v<=prev)continue;
     let maxO=0;for(let j=1;j<=P.seats;j++)if(j!==s)maxO=Math.max(maxO,C[`seat${j}_bet`]||0);
     const me=s===1,m=money(v);let t;
-    if(n===0&&round.count<2&&v>=maxO)t=`${seatName(s)}: buio ${m}.`;
+    if(n===0&&round.count<2&&v>=maxO)t=`${seatName(s)} buio ${m}.`;
     else if(maxO===0)t=me?`Tu punti ${m}.`:`${seatName(s)} punta ${m}.`;
-    else if(v>maxO)t=me?`Tu rilanci a ${m}.`:`${seatName(s)} rilancia a ${m}.`;
-    else if(v===maxO)t=me?`Tu chiami ${m}.`:`${seatName(s)} chiama ${m}.`;
+    else if(v>maxO)t=me?`Tu rilanci ${m}.`:`${seatName(s)} rilancia ${m}.`;
+    else if(v===maxO)t=me?'Tu chiami.':`${seatName(s)} chiama.`;
     else t=me?`Tu metti ${m}.`:`${seatName(s)} mette ${m}.`;
     round.count++;
     if(me?settings.myBets:settings.bets)say(t,0);
@@ -603,14 +628,14 @@ function process(raw){
   if(ch.turn&&C.turn){
     let maxO=0;for(let j=2;j<=P.seats;j++)maxO=Math.max(maxO,C[`seat${j}_bet`]||0);
     const need=maxO-(C.seat1_bet||0);
-    say('Tocca a te.'+(need>0?` Per chiamare servono ${money(need)}.`:''),2);
+    const tp=totalPot();say('Tocca a te. '+(need>0?`${money(need)} per chiamare`:'Nessuna puntata')+(tp?`, piatto ${money(tp)}.`:'.'),2);
   }
 }
 function query(q){
   const b=boardCards(),h=[C.hero1,C.hero2].filter(Boolean);
-  const carte=h.length?`Le tue carte: ${listIt(h.map(cardName))}.`:'Non hai carte.';
-  const tavolo=b.length?`Sul tavolo: ${listIt(b.map(cardName))}.`:'Nessuna carta sul tavolo.';
-  const piatto=C.pot?`Piatto ${money(C.pot)}.`:'Piatto non leggibile o vuoto.';
+  const carte=h.length?`Carte: ${h.map(cardName).join(', ')}.${madeText()?' Hai '+madeText()+'.':''}`:'Non hai carte.';
+  const tavolo=b.length?`Tavolo: ${b.map(cardName).join(', ')}.`:'Tavolo vuoto.';
+  const piatto=totalPot()?`Piatto ${money(totalPot())}.`:'Piatto vuoto.';
   const bets=[];for(let s=1;s<=P.seats;s++){const v=C[`seat${s}_bet`];if(v)bets.push(`${seatName(s)} ${money(v)}`);}
   const gioc=`${occupied().length} giocatori. `+(bets.length?`Puntate: ${bets.join('; ')}.`:'Nessuna puntata.');
   if(q==='zitto'){hush();return;}
@@ -734,7 +759,7 @@ function bindSetting(id,key,isCheck){
   });
 }
 bindSetting('#sVoice','voice',true);bindSetting('#sAria','aria',true);bindSetting('#sBets','bets',true);
-bindSetting('#sMyBets','myBets',true);bindSetting('#sPot','pot',true);bindSetting('#sRate','rate');bindSetting('#sFps','fps');
+bindSetting('#sMyBets','myBets',true);bindSetting('#sMade','made',true);bindSetting('#sPotIncl','potIncl',true);bindSetting('#sPot','pot',true);bindSetting('#sRate','rate');bindSetting('#sFps','fps');
 $('#sRateV').textContent=settings.rate.toFixed(1)+'×';
 
 // calibrazione
@@ -866,7 +891,7 @@ if(new URLSearchParams(location.search).has('tavolo')){
   document.body.classList.add('tavolo');document.body.append(demo.canvas);
   setInterval(()=>demo.update(performance.now(),1),100);
 }else buildCalibUI();
-window.__lp={demo,C:()=>C,spoken,readAll,raw:()=>lastRaw,parseAmount,templates};
+window.__lp={handName,demo,C:()=>C,spoken,readAll,raw:()=>lastRaw,parseAmount,templates};
 </script>
 </body>
 </html>
