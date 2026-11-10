@@ -93,6 +93,14 @@ legend{color:var(--sun)}
 .seg label{display:flex;gap:5px;align-items:center}
 #bigHost{display:flex}
 #bigHost>*{margin:0 auto}
+.tab.ico{padding:6px 12px;line-height:0;color:var(--cyan)}
+.tab.ico .ic{width:18px;height:18px}
+.tab.ico[aria-selected=true]{color:#fff}
+.bar .sp .ic{width:16px;height:12px;fill:currentColor;shape-rendering:crispEdges}
+.tt{position:relative}
+.tt:hover::after,.tt:focus-visible::after{content:attr(aria-label);position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);white-space:nowrap;background:#0c0620;color:#fff;border:1px solid var(--cyan);border-radius:4px;padding:4px 9px;font-size:12px;font-weight:400;line-height:1.3;box-shadow:0 0 10px rgba(25,241,255,.4);z-index:40;pointer-events:none}
+.bar .sp.tt:hover::after{left:auto;right:0;transform:none}
+.bar .tab.tt:first-child:hover::after{left:0;transform:none}
 .hrow{display:flex;align-items:center;gap:14px;margin:0 0 10px}
 .hrow h2{margin:0!important;flex:none}
 .zoombar{flex:1;display:flex;align-items:center;gap:8px;margin:0;font-size:12px;color:var(--muted)}
@@ -202,7 +210,6 @@ details.fx .secbody{padding:10px 0 0}
 /* Stampa: solo i fogli, uno per pagina */
 #printRoot{display:none}
 .rail{display:none}
-.dtip{flex:1;min-width:0;font-size:12px;color:var(--muted)}
 .btn.accent{background:linear-gradient(90deg,var(--cyan),var(--violet));border-color:var(--cyan);color:#0c0620;font-weight:700;box-shadow:0 0 12px rgba(25,241,255,.4)}
 .btn.accent:hover:not(:disabled){color:#fff}
 .bigbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;margin-top:14px;padding:16px 18px;font-size:18px}
@@ -259,7 +266,6 @@ details.fx .secbody{padding:10px 0 0}
   #inspBody{overflow:visible}
   #deskBody{overflow:visible}
   .top{padding:10px 12px 12px}
-  .bar .dtip{order:9;flex:1 0 100%}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 /* Puntatore 8 bit */
@@ -497,10 +503,9 @@ input[type=text],textarea{cursor:text}
 
     <section class="deskwrap" aria-label="Pagine del libretto">
       <div class="bar" role="tablist">
-        <button class="tab" role="tab" id="tabPages" type="button" aria-selected="true">Pagine</button>
-        <button class="tab" role="tab" id="tabSheets" type="button" aria-selected="false">Fogli da stampare</button>
-        <span class="dtip" id="deskTip"></span>
-        <label class="sp">Miniature <input type="range" id="thumb" min="70" max="230" value="104"></label>
+        <button class="tab ico tt" role="tab" id="tabPages" type="button" aria-selected="true" aria-label="Pagine"><svg class="ic" viewBox="0 0 9 9" aria-hidden="true"><path d="M0 0h4v1h-4zM5 0h4v1h-4zM0 1h1v1h-1zM3 1h1v1h-1zM5 1h1v1h-1zM8 1h1v1h-1zM0 2h1v1h-1zM3 2h1v1h-1zM5 2h1v1h-1zM8 2h1v1h-1zM0 3h4v1h-4zM5 3h4v1h-4zM0 5h4v1h-4zM5 5h4v1h-4zM0 6h1v1h-1zM3 6h1v1h-1zM5 6h1v1h-1zM8 6h1v1h-1zM0 7h1v1h-1zM3 7h1v1h-1zM5 7h1v1h-1zM8 7h1v1h-1zM0 8h4v1h-4zM5 8h4v1h-4z"/></svg></button>
+        <button class="tab ico tt" role="tab" id="tabSheets" type="button" aria-selected="false" aria-label="Fogli da stampare"><svg class="ic" viewBox="0 0 11 7" aria-hidden="true"><path d="M0 0h11v1h-11zM0 1h1v1h-1zM5 1h1v1h-1zM10 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM10 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM10 3h1v1h-1zM0 4h1v1h-1zM5 4h1v1h-1zM10 4h1v1h-1zM0 5h1v1h-1zM5 5h1v1h-1zM10 5h1v1h-1zM0 6h11v1h-11z"/></svg></button>
+        <label class="sp tt" aria-label="Miniature"><svg class="ic" viewBox="0 0 11 7" aria-hidden="true"><path d="M0 0h11v1h-11zM0 1h1v1h-1zM10 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM10 2h1v1h-1zM0 3h1v1h-1zM4 3h3v1h-3zM10 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM10 4h1v1h-1zM0 5h5v1h-5zM6 5h5v1h-5zM0 6h11v1h-11z"/></svg><input type="range" id="thumb" min="70" max="230" value="104" aria-label="Miniature"></label>
       </div>
       <div id="deskBody"></div>
     </section>
@@ -3013,7 +3018,7 @@ function spreadEl(l, r){
   return box;
 }
 function grp(t, ...n){ const g = el('div','grp'); g.append(textEl('sect', T(t)), ...n); return g; }
-function setTip(t){ const e = $('#deskTip'); e.textContent = t; e.title = t; }
+function setTip(t){}
 function renderDesk(){
   const body = $('#deskBody'), keepScroll = body.scrollTop; body.replaceChildren();
   if(state.tab==='pages'){
