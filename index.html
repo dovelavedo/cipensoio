@@ -43,7 +43,7 @@
   --bg:#0c0620; --panel:#150a33; --panel2:#201049; --ink:#f2eaff; --muted:#a898d8; --line:#3a2a78; --field:#0e0626;
   --cyan:#19f1ff; --pink:#ff3bd4; --sun:#ffb454; --violet:#8c5cff; --danger:#ff7a9c;
   --accent:#19f1ff; --accent-ink:#04121a;
-  --thumbW:104px; --bigW:280px; --pw:138.5;
+  --thumbW:70px; --bigW:280px; --pw:138.5;
   --ui:'Chakra Petch',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --px:'Press Start 2P','Courier New',monospace;
   color-scheme:dark;
@@ -101,6 +101,7 @@ legend{color:var(--sun)}
 .tt:hover::after,.tt:focus-visible::after{content:attr(aria-label);position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);white-space:nowrap;background:#0c0620;color:#fff;border:1px solid var(--cyan);border-radius:4px;padding:4px 9px;font-size:12px;font-weight:400;line-height:1.3;box-shadow:0 0 10px rgba(25,241,255,.4);z-index:40;pointer-events:none}
 .bar .sp.tt:hover::after{left:auto;right:0;transform:none}
 .bar .tab.tt:first-child:hover::after{left:0;transform:none}
+.inspPg[hidden]{display:none}
 .hrow{display:flex;align-items:center;gap:14px;margin:0 0 10px}
 .hrow h2{margin:0!important;flex:none}
 .zoombar{flex:1;display:flex;align-items:center;gap:8px;margin:0;font-size:12px;color:var(--muted)}
@@ -230,7 +231,10 @@ details.fx .secbody{padding:10px 0 0}
   .railbody details.sec>summary::before{display:none}
   .panel.right{grid-area:insp;display:grid;grid-template-columns:minmax(360px,52%) minmax(0,1fr);grid-template-rows:minmax(0,1fr);border-left:0;overflow:hidden}
   #inspHead{overflow:auto;padding:16px 18px;border-bottom:0;border-right:1px solid var(--line);box-shadow:none}
-  #inspBody{column-width:270px;column-gap:20px;padding:16px 18px 28px}
+  .panel.right{position:relative}
+  #inspBody{column-width:270px;column-gap:20px;padding:16px 18px 22px;overflow-x:hidden;scrollbar-width:thin}
+  .inspPg{position:absolute;right:12px;bottom:3px;z-index:5;height:18px;padding:0 10px;font-size:11px;line-height:16px;border:1px solid var(--cyan);border-radius:3px;background:#0c0620;color:var(--cyan);cursor:pointer}
+  .inspPg:hover{color:#fff;box-shadow:0 0 8px rgba(25,241,255,.5)}
   #inspBody>*{break-inside:avoid}
   .deskwrap{grid-area:desk;border-top:2px solid var(--pink);max-height:46vh}
   .bar{padding:6px 16px}
@@ -505,7 +509,7 @@ input[type=text],textarea{cursor:text}
       <div class="bar" role="tablist">
         <button class="tab ico tt" role="tab" id="tabPages" type="button" aria-selected="true" aria-label="Pagine"><svg class="ic" viewBox="0 0 9 9" aria-hidden="true"><path d="M0 0h4v1h-4zM5 0h4v1h-4zM0 1h1v1h-1zM3 1h1v1h-1zM5 1h1v1h-1zM8 1h1v1h-1zM0 2h1v1h-1zM3 2h1v1h-1zM5 2h1v1h-1zM8 2h1v1h-1zM0 3h4v1h-4zM5 3h4v1h-4zM0 5h4v1h-4zM5 5h4v1h-4zM0 6h1v1h-1zM3 6h1v1h-1zM5 6h1v1h-1zM8 6h1v1h-1zM0 7h1v1h-1zM3 7h1v1h-1zM5 7h1v1h-1zM8 7h1v1h-1zM0 8h4v1h-4zM5 8h4v1h-4z"/></svg></button>
         <button class="tab ico tt" role="tab" id="tabSheets" type="button" aria-selected="false" aria-label="Fogli da stampare"><svg class="ic" viewBox="0 0 11 7" aria-hidden="true"><path d="M0 0h11v1h-11zM0 1h1v1h-1zM5 1h1v1h-1zM10 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM10 2h1v1h-1zM0 3h1v1h-1zM5 3h1v1h-1zM10 3h1v1h-1zM0 4h1v1h-1zM5 4h1v1h-1zM10 4h1v1h-1zM0 5h1v1h-1zM5 5h1v1h-1zM10 5h1v1h-1zM0 6h11v1h-11z"/></svg></button>
-        <label class="sp tt" aria-label="Miniature"><svg class="ic" viewBox="0 0 11 7" aria-hidden="true"><path d="M0 0h11v1h-11zM0 1h1v1h-1zM10 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM10 2h1v1h-1zM0 3h1v1h-1zM4 3h3v1h-3zM10 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM10 4h1v1h-1zM0 5h5v1h-5zM6 5h5v1h-5zM0 6h11v1h-11z"/></svg><input type="range" id="thumb" min="70" max="230" value="104" aria-label="Miniature"></label>
+        <label class="sp tt" aria-label="Miniature"><svg class="ic" viewBox="0 0 11 7" aria-hidden="true"><path d="M0 0h11v1h-11zM0 1h1v1h-1zM10 1h1v1h-1zM0 2h1v1h-1zM5 2h1v1h-1zM10 2h1v1h-1zM0 3h1v1h-1zM4 3h3v1h-3zM10 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM10 4h1v1h-1zM0 5h5v1h-5zM6 5h5v1h-5zM0 6h11v1h-11z"/></svg><input type="range" id="thumb" min="70" max="230" value="70" aria-label="Miniature"></label>
       </div>
       <div id="deskBody"></div>
     </section>
@@ -513,6 +517,7 @@ input[type=text],textarea{cursor:text}
     <aside class="panel right" id="insp" aria-label="Pagina selezionata">
       <div id="inspHead"></div>
       <div id="inspBody"></div>
+      <button class="inspPg" id="inspPg" type="button" hidden aria-label="Pagina dei comandi">1 / 2</button>
     </aside>
   </div>
 </div>
@@ -3111,7 +3116,7 @@ function tplHTML(P){
 }
 function renderInspector(){
   const key = state.sel, P = getPage(key), head = $('#inspHead'), body = $('#inspBody'), fields = fieldsOf(P.layout);
-  const J = joinFor(key), pair = pairOf(key), keepScroll = (inspKey===key) ? body.scrollTop : 0;
+  const J = joinFor(key), pair = pairOf(key), keepScroll = (inspKey===key) ? body.scrollTop : 0, keepLeft = (inspKey===key) ? body.scrollLeft : 0;
   inspKey = key;
   head.replaceChildren(); sizeBig();
   const h = el('h2'); h.textContent = J ? label(J.l)+' + '+label(J.r) : label(key);
@@ -3174,8 +3179,25 @@ function renderInspector(){
     $('#fAlign').value = P.align; $('#fTc').value = P.tc; $('#fSize').value = P.size;
     if($('#fVpos')) $('#fVpos').value = P.vpos || 'top';
   }
-  body.scrollTop = keepScroll;
+  body.scrollTop = keepScroll; body.scrollLeft = keepLeft; updInspPg();
 }
+function inspPages(){
+  const b = $('#inspBody'), cs = getComputedStyle(b), pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const step = b.clientWidth - pad + parseFloat(cs.columnGap || 20);
+  return { n: Math.max(1, Math.round((b.scrollWidth - pad + 20) / step)), step };
+}
+function updInspPg(){
+  const btn = $('#inspPg'), b = $('#inspBody');
+  if(window.matchMedia('(max-width:1000px)').matches){ btn.hidden = true; return; }
+  const {n, step} = inspPages(), cur = Math.min(n-1, Math.round(b.scrollLeft/step));
+  btn.hidden = n<2; btn.textContent = (cur+1)+' / '+n;
+}
+$('#inspPg').addEventListener('click', () => {
+  const b = $('#inspBody'), {n, step} = inspPages(), cur = Math.round(b.scrollLeft/step);
+  b.scrollTo({left: ((cur+1) % n)*step, behavior:'smooth'});
+  setTimeout(updInspPg, 350);
+});
+window.addEventListener('resize', updInspPg);
 function setBigZoom(z){
   bigZoom = clamp(Math.round(z*20)/20, .5, 3);
   const s = $('#bigZoom'); if(s) s.value = Math.round(bigZoom*100);
