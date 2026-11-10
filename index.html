@@ -91,7 +91,14 @@ legend{color:var(--sun)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
 .seg{display:flex;gap:14px;margin:10px 0 8px;flex-wrap:wrap}
 .seg label{display:flex;gap:5px;align-items:center}
-#bigHost{display:flex;justify-content:center}
+#bigHost{display:flex}
+#bigHost>*{margin:0 auto}
+.hrow{display:flex;align-items:center;gap:14px;margin:0 0 10px}
+.hrow h2{margin:0!important;flex:none}
+.zoombar{flex:1;display:flex;align-items:center;gap:8px;margin:0;font-size:12px;color:var(--muted)}
+.zoombar input{flex:1;min-width:80px;max-width:240px}
+#bigZoomVal{min-width:38px;text-align:right}
+@media (max-width:1000px){.zoombar{display:none}}
 
 /* Tendine del pannello sinistro */
 details.sec{border:1px solid var(--line);border-radius:4px;background:var(--panel2);margin:0 0 10px}
@@ -2143,6 +2150,9 @@ const EN = {
 "Modifica": "Edit",
 "Carica immagine": "Upload image",
 "Carica foto": "Upload photo",
+"Adatta": "Fit",
+"Riduci": "Zoom out",
+"Ingrandisci": "Zoom in",
 "Formato": "Format",
 "Tipo di libretto": "Booklet type",
 "Libretto cucito (fogli incastrati)": "Sewn booklet (nested sheets)",
@@ -3035,7 +3045,7 @@ function renderDesk(){
 }
 
 /* ---------- Pagina selezionata ---------- */
-let fxOpen = false, inspKey = null;
+let fxOpen = false, inspKey = null, bigZoom = 1;
 function sizeBig(){
   const {pw,ph} = dims(), J = joinFor(state.sel), mobile = window.matchMedia('(max-width:1000px)').matches;
   let w;
@@ -3045,8 +3055,8 @@ function sizeBig(){
     w = Math.min(targetH*pw/ph, J ? panelW/2 - 2 : panelW);
   } else {
     const availW = Math.max(200, ($('#inspHead').clientWidth || 400) - 36);
-    const availH = Math.max(170, ($('#insp').clientHeight || 500) - 80);
-    w = Math.min(availH*pw/ph, J ? availW/2 - 2 : availW);
+    const availH = Math.max(170, ($('#insp').clientHeight || 500) - 78);
+    w = Math.min(availH*pw/ph, J ? availW/2 - 2 : availW) * bigZoom;
   }
   $('#inspHead').style.setProperty('--bigW', Math.round(w)+'px');
 }
@@ -3099,7 +3109,14 @@ function renderInspector(){
   const J = joinFor(key), pair = pairOf(key), keepScroll = (inspKey===key) ? body.scrollTop : 0;
   inspKey = key;
   head.replaceChildren(); sizeBig();
-  const h = el('h2'); h.textContent = J ? label(J.l)+' + '+label(J.r) : label(key); head.append(h);
+  const h = el('h2'); h.textContent = J ? label(J.l)+' + '+label(J.r) : label(key);
+  const zb = el('div','zoombar');
+  zb.innerHTML = '<button class="btn small" type="button" data-zm="-" title="'+T('Riduci')+'" aria-label="'+T('Riduci')+'">−</button>'+
+    '<input type="range" id="bigZoom" min="50" max="300" step="5" value="'+Math.round(bigZoom*100)+'" aria-label="'+T('Zoom')+'">'+
+    '<button class="btn small" type="button" data-zm="+" title="'+T('Ingrandisci')+'" aria-label="'+T('Ingrandisci')+'">+</button>'+
+    '<span id="bigZoomVal">'+Math.round(bigZoom*100)+'%</span>'+
+    '<button class="btn small" type="button" data-zm="0">'+T('Adatta')+'</button>';
+  const hr = el('div','hrow'); hr.append(h, zb); head.append(hr);
   const host = el('div'); host.id = 'bigHost';
   if(J){ const sp = el('div','spread'); sp.append(renderPage(J.l,'big'), renderPage(J.r,'big')); host.append(sp); }
   else host.append(renderPage(key,'big'));
@@ -3154,6 +3171,21 @@ function renderInspector(){
   }
   body.scrollTop = keepScroll;
 }
+function setBigZoom(z){
+  bigZoom = clamp(Math.round(z*20)/20, .5, 3);
+  const s = $('#bigZoom'); if(s) s.value = Math.round(bigZoom*100);
+  const v = $('#bigZoomVal'); if(v) v.textContent = Math.round(bigZoom*100)+'%';
+  sizeBig();
+}
+$('#inspHead').addEventListener('click', e => {
+  const b = e.target.closest('[data-zm]'); if(!b) return;
+  setBigZoom(b.dataset.zm==='0' ? 1 : bigZoom + (b.dataset.zm==='+' ? .25 : -.25));
+});
+$('#inspHead').addEventListener('input', e => { if(e.target.id==='bigZoom') setBigZoom(+e.target.value/100); });
+$('#inspHead').addEventListener('wheel', e => {
+  if(!(e.ctrlKey || e.metaKey) || window.matchMedia('(max-width:1000px)').matches) return;
+  e.preventDefault(); setBigZoom(bigZoom * (e.deltaY<0 ? 1.1 : 1/1.1));
+}, {passive:false});
 function select(key){
   state.sel = key;
   document.querySelectorAll('.page.thumb').forEach(p => p.classList.toggle('sel', p.dataset.key===key));
