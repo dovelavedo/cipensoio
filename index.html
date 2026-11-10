@@ -196,6 +196,8 @@ details.fx .secbody{padding:10px 0 0}
 #printRoot{display:none}
 .rail{display:none}
 .dtip{flex:1;min-width:0;font-size:12px;color:var(--muted)}
+.btn.accent{background:linear-gradient(90deg,var(--cyan),var(--violet));border-color:var(--cyan);color:#0c0620;font-weight:700;box-shadow:0 0 12px rgba(25,241,255,.4)}
+.btn.accent:hover:not(:disabled){color:#fff}
 .bigbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;margin-top:14px;padding:16px 18px;font-size:18px}
 .bigbtn .ic{width:26px;height:26px}
 @media (min-width:1001px){
@@ -212,7 +214,7 @@ details.fx .secbody{padding:10px 0 0}
   .railbody details.sec.cur{display:block}
   .railbody details.sec>summary{pointer-events:none}
   .railbody details.sec>summary::before{display:none}
-  .panel.right{grid-area:insp;display:grid;grid-template-columns:minmax(320px,44%) minmax(0,1fr);grid-template-rows:minmax(0,1fr);border-left:0;overflow:hidden}
+  .panel.right{grid-area:insp;display:grid;grid-template-columns:minmax(360px,52%) minmax(0,1fr);grid-template-rows:minmax(0,1fr);border-left:0;overflow:hidden}
   #inspHead{overflow:auto;padding:16px 18px;border-bottom:0;border-right:1px solid var(--line);box-shadow:none}
   #inspBody{column-width:270px;column-gap:20px;padding:16px 18px 28px}
   #inspBody>*{break-inside:avoid}
@@ -2140,6 +2142,7 @@ const EN = {
 "Pagine": "Pages",
 "Modifica": "Edit",
 "Carica immagine": "Upload image",
+"Carica foto": "Upload photo",
 "Formato": "Format",
 "Tipo di libretto": "Booklet type",
 "Libretto cucito (fogli incastrati)": "Sewn booklet (nested sheets)",
@@ -3042,7 +3045,7 @@ function sizeBig(){
     w = Math.min(targetH*pw/ph, J ? panelW/2 - 2 : panelW);
   } else {
     const availW = Math.max(200, ($('#inspHead').clientWidth || 400) - 36);
-    const availH = Math.max(170, ($('#insp').clientHeight || 500) - 150);
+    const availH = Math.max(170, ($('#insp').clientHeight || 500) - 80);
     w = Math.min(availH*pw/ph, J ? availW/2 - 2 : availW);
   }
   $('#inspHead').style.setProperty('--bigW', Math.round(w)+'px');
@@ -3058,7 +3061,7 @@ function fxHTML(i, s){
 function photoSet(title, i, s, kind, extra){
   const fit = s ? effFit(s, kind) : 'contain', dis = s ? '' : ' disabled';
   return '<fieldset><legend>'+title+'</legend>'+
-    '<div class="row"><button class="btn" type="button" data-act="pick" data-i="'+i+'">'+(s ? T('Cambia foto') : T('Scegli foto'))+'</button>'+
+    '<div class="row"><button class="btn accent" type="button" data-act="pick" data-i="'+i+'">'+T('Carica foto')+'</button>'+
     '<button class="btn" type="button" data-act="rm" data-i="'+i+'"'+dis+'>'+T('Togli')+'</button>'+
     '<button class="btn" type="button" data-act="rot" data-i="'+i+'"'+dis+'>'+T('Ruota')+'</button>'+(extra||'')+'</div>'+
     '<div class="seg"><label><input type="radio" name="fit'+i+'" data-fit="'+i+'" value="contain"'+(fit==='contain' ? ' checked' : '')+dis+'> '+T('Foto intera')+'</label>'+
@@ -3101,13 +3104,6 @@ function renderInspector(){
   if(J){ const sp = el('div','spread'); sp.append(renderPage(J.l,'big'), renderPage(J.r,'big')); host.append(sp); }
   else host.append(renderPage(key,'big'));
   head.append(host);
-  const nsl = J ? 1 : (P.layout==='framed' ? ((P.two || P.slots[1]) ? 2 : 1) : SLOT_COUNT[P.layout]);
-  if(nsl>0){
-    const cur = J ? [J.d.slot] : P.slots.slice(0, nsl);
-    let pi = cur.findIndex(x => !x); if(pi<0) pi = 0;
-    const ub = el('button','btn primary bigbtn'); ub.type = 'button'; ub.dataset.act = 'pick'; ub.dataset.i = pi;
-    ub.innerHTML = '<svg class="ic" viewBox="0 0 11 10" aria-hidden="true"><path d="M5 0h1v1h-1zM4 1h3v1h-3zM3 2h5v1h-5zM2 3h7v1h-7zM5 4h1v1h-1zM5 5h1v1h-1zM5 6h1v1h-1zM0 7h1v1h-1zM10 7h1v1h-1zM0 8h1v1h-1zM10 8h1v1h-1zM0 9h11v1h-11z"/></svg><span>'+T('Carica immagine')+'</span>'; head.append(ub);
-  }
 
   let html = '';
   if(!J && (P.layout==='framed' || P.layout==='full')){
