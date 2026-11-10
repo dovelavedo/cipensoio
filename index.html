@@ -43,7 +43,7 @@
   --bg:#0c0620; --panel:#150a33; --panel2:#201049; --ink:#f2eaff; --muted:#a898d8; --line:#3a2a78; --field:#0e0626;
   --cyan:#19f1ff; --pink:#ff3bd4; --sun:#ffb454; --violet:#8c5cff; --danger:#ff7a9c;
   --accent:#19f1ff; --accent-ink:#04121a;
-  --thumbW:130px; --bigW:280px; --pw:138.5;
+  --thumbW:104px; --bigW:280px; --pw:138.5;
   --ui:'Chakra Petch',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --px:'Press Start 2P','Courier New',monospace;
   color-scheme:dark;
@@ -114,7 +114,7 @@ details.sub .secbody{padding:10px 10px 0}
 .bar{position:relative;z-index:1;display:flex;gap:6px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);background:rgba(21,10,51,.88);flex-wrap:wrap}
 .tab{border:0;background:none;padding:6px 12px;border-radius:4px;cursor:pointer}
 .tab[aria-selected=true]{background:linear-gradient(90deg,var(--pink),var(--violet));color:#fff;font-weight:700}
-.bar .sp{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.bar .sp{margin-left:auto;flex:none;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
 .bar .sp input{width:110px}
 #deskBody{position:relative;z-index:1;overflow:auto;padding:18px 20px 40px;min-height:0}
 .sect{font-size:12px;color:var(--sun);margin:20px 0 8px;font-weight:700}
@@ -194,6 +194,37 @@ details.fx .secbody{padding:10px 0 0}
 
 /* Stampa: solo i fogli, uno per pagina */
 #printRoot{display:none}
+.rail{display:none}
+.dtip{flex:1;min-width:0;font-size:12px;color:var(--muted)}
+.bigbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;margin-top:14px;padding:16px 18px;font-size:18px}
+.bigbtn .ic{width:26px;height:26px}
+@media (min-width:1001px){
+  .work{grid-template-columns:auto minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"left insp" "desk desk"}
+  .panel.left{grid-area:left;display:flex;padding:0;overflow:hidden}
+  .rail{display:flex;flex-direction:column;gap:8px;padding:10px 8px;width:58px;flex:none;background:var(--panel2);border-right:1px solid var(--line)}
+  .rb{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--line);background:var(--field);border-radius:4px;color:var(--cyan);padding:0;cursor:pointer}
+  .rb:hover{color:#fff;border-color:var(--cyan);box-shadow:0 0 10px rgba(25,241,255,.35)}
+  .rb[aria-pressed=true]{color:#fff;border-color:var(--pink);background:linear-gradient(90deg,var(--pink),var(--violet));box-shadow:0 0 12px rgba(255,59,212,.6)}
+  .rb .ic{width:20px;height:20px}
+  .railbody{display:none;width:290px;overflow:auto;padding:14px}
+  .panel.left.open .railbody{display:block}
+  .railbody details.sec{display:none}
+  .railbody details.sec.cur{display:block}
+  .railbody details.sec>summary{pointer-events:none}
+  .railbody details.sec>summary::before{display:none}
+  .panel.right{grid-area:insp;display:grid;grid-template-columns:minmax(320px,44%) minmax(0,1fr);grid-template-rows:minmax(0,1fr);border-left:0;overflow:hidden}
+  #inspHead{overflow:auto;padding:16px 18px;border-bottom:0;border-right:1px solid var(--line);box-shadow:none}
+  #inspBody{column-width:270px;column-gap:20px;padding:16px 18px 28px}
+  #inspBody>*{break-inside:avoid}
+  .deskwrap{grid-area:desk;border-top:2px solid var(--pink);max-height:46vh}
+  .bar{padding:6px 16px}
+  #deskBody{display:flex;align-items:flex-start;gap:30px;overflow:auto;padding:12px 18px 16px}
+  .grp{flex:none}
+  .grp .sect{margin:0 0 6px}
+  .grid{flex-wrap:nowrap}
+  .sheetlist{flex-direction:row;margin-top:0;gap:26px}
+  .sidecard{flex:none}
+}
 @media print{
   html,body{height:auto;background:#fff!important}
   .appui{display:none!important}
@@ -219,6 +250,7 @@ details.fx .secbody{padding:10px 0 0}
   #inspBody{overflow:visible}
   #deskBody{overflow:visible}
   .top{padding:10px 12px 12px}
+  .bar .dtip{order:9;flex:1 0 100%}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 /* Puntatore 8 bit */
@@ -317,7 +349,14 @@ input[type=text],textarea{cursor:text}
     <button type="button" data-goto="edit" aria-pressed="false">Modifica</button>
   </nav>
   <div class="work" id="work" data-view="pages">
-    <aside class="panel left" aria-label="Impostazioni">
+    <aside class="panel left" id="lp" aria-label="Impostazioni">
+      <nav class="rail" aria-label="Impostazioni">
+        <button class="rb" type="button" data-sec="formato" title="Formato" aria-label="Formato" aria-pressed="false"><svg class="ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M0 0h7v1h-7zM0 1h1v1h-1zM6 1h2v1h-2zM0 2h1v1h-1zM6 2h1v1h-1zM8 2h1v1h-1zM0 3h1v1h-1zM6 3h4v1h-4zM0 4h1v1h-1zM8 4h1v1h-1zM0 5h1v1h-1zM2 5h4v1h-4zM8 5h1v1h-1zM0 6h1v1h-1zM8 6h1v1h-1zM0 7h1v1h-1zM2 7h4v1h-4zM8 7h1v1h-1zM0 8h1v1h-1zM8 8h1v1h-1zM0 9h9v1h-9z"/></svg></button>
+        <button class="rb" type="button" data-sec="aspetto" title="Testi e colori" aria-label="Testi e colori" aria-pressed="false"><svg class="ic" viewBox="0 0 10 8" aria-hidden="true"><path d="M0 0h10v1h-10zM0 1h10v1h-10zM3 2h4v1h-4zM3 3h4v1h-4zM3 4h4v1h-4zM3 5h4v1h-4zM3 6h4v1h-4zM3 7h4v1h-4z"/></svg></button>
+        <button class="rb" type="button" data-sec="qr" title="QR e scritte sul retro" aria-label="QR e scritte sul retro" aria-pressed="false"><svg class="ic" viewBox="0 0 9 9" aria-hidden="true"><path d="M0 0h3v1h-3zM4 0h3v1h-3zM8 0h1v1h-1zM0 1h1v1h-1zM2 1h1v1h-1zM4 1h1v1h-1zM6 1h1v1h-1zM0 2h3v1h-3zM4 2h3v1h-3zM8 2h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM7 4h2v1h-2zM2 5h1v1h-1zM5 5h1v1h-1zM7 5h1v1h-1zM0 6h3v1h-3zM4 6h1v1h-1zM6 6h1v1h-1zM0 7h1v1h-1zM2 7h1v1h-1zM5 7h2v1h-2zM8 7h1v1h-1zM0 8h3v1h-3zM4 8h1v1h-1zM7 8h1v1h-1z"/></svg></button>
+        <button class="rb" type="button" data-sec="stampa" title="Taglio e stampa" aria-label="Taglio e stampa" aria-pressed="false"><svg class="ic" viewBox="0 0 9 11" aria-hidden="true"><path d="M0 0h1v1h-1zM8 0h1v1h-1zM1 1h1v1h-1zM7 1h1v1h-1zM2 2h1v1h-1zM6 2h1v1h-1zM3 3h1v1h-1zM5 3h1v1h-1zM4 4h1v1h-1zM3 5h1v1h-1zM5 5h1v1h-1zM1 6h3v1h-3zM5 6h3v1h-3zM0 7h1v1h-1zM4 7h1v1h-1zM8 7h1v1h-1zM0 8h1v1h-1zM4 8h1v1h-1zM8 8h1v1h-1zM0 9h1v1h-1zM4 9h1v1h-1zM8 9h1v1h-1zM1 10h3v1h-3zM5 10h3v1h-3z"/></svg></button>
+      </nav>
+      <div class="railbody">
 
       <details class="sec" data-sec="formato" open>
         <summary>Formato</summary>
@@ -444,13 +483,15 @@ input[type=text],textarea{cursor:text}
         </div>
       </details>
 
+      </div>
     </aside>
 
     <section class="deskwrap" aria-label="Pagine del libretto">
       <div class="bar" role="tablist">
         <button class="tab" role="tab" id="tabPages" type="button" aria-selected="true">Pagine</button>
         <button class="tab" role="tab" id="tabSheets" type="button" aria-selected="false">Fogli da stampare</button>
-        <label class="sp">Miniature <input type="range" id="thumb" min="90" max="230" value="130"></label>
+        <span class="dtip" id="deskTip"></span>
+        <label class="sp">Miniature <input type="range" id="thumb" min="70" max="230" value="104"></label>
       </div>
       <div id="deskBody"></div>
     </section>
@@ -2098,6 +2139,7 @@ const EN = {
 "Impostazioni": "Settings",
 "Pagine": "Pages",
 "Modifica": "Edit",
+"Carica immagine": "Upload image",
 "Formato": "Format",
 "Tipo di libretto": "Booklet type",
 "Libretto cucito (fogli incastrati)": "Sewn booklet (nested sheets)",
@@ -2957,28 +2999,27 @@ function spreadEl(l, r){
   }
   return box;
 }
+function grp(t, ...n){ const g = el('div','grp'); g.append(textEl('sect', T(t)), ...n); return g; }
+function setTip(t){ const e = $('#deskTip'); e.textContent = t; e.title = t; }
 function renderDesk(){
   const body = $('#deskBody'), keepScroll = body.scrollTop; body.replaceChildren();
   if(state.tab==='pages'){
-    body.append(textEl('tip', isOne()
+    setTip(isOne()
       ? T('Trascina le foto sulle pagine. Se ne trascini più di una, riempiono le pagine vuote in ordine. Trascina una pagina su un\'altra per scambiarle. Clicca una pagina per modificarla a destra.')
-      : T('Trascina le foto sulle pagine. Se ne trascini più di una, riempiono le pagine vuote in ordine. Trascina una pagina su un\'altra per scambiarle. Clicca una pagina per modificarla a destra. Sotto la copertina e sotto la piega centrale di ogni gruppo trovi il tasto per unire le due pagine con una foto sola.')));
+      : T('Trascina le foto sulle pagine. Se ne trascini più di una, riempiono le pagine vuote in ordine. Trascina una pagina su un\'altra per scambiarle. Clicca una pagina per modificarla a destra. Sotto la copertina e sotto la piega centrale di ogni gruppo trovi il tasto per unire le due pagine con una foto sola.'));
     if(isOne()){
-      body.append(textEl('sect', T('Copertina')), spreadEl('cf', null));
-      body.append(textEl('sect', T('Pagine interne, come le vedi a libretto aperto')));
       const grid = el('div','grid');
       [['p1','p2'],['p3','p4'],['p5','p6']].forEach(([a,b]) => grid.append(spreadEl(a,b)));
-      body.append(grid, textEl('sect', T('Retro')), spreadEl('cb', null));
+      body.append(grp('Copertina', spreadEl('cf', null)), grp('Pagine interne, come le vedi a libretto aperto', grid), grp('Retro', spreadEl('cb', null)));
     } else {
-      body.append(textEl('sect', T('Copertina, esterno (retro e fronte)')), spreadEl('cb','cf'));
-      body.append(textEl('sect', T('Pagine interne, come le vedi a libretto aperto')));
-      const grid = el('div','grid'); spreads().forEach(sp => grid.append(spreadEl(sp.l, sp.r))); body.append(grid);
+      const grid = el('div','grid'); spreads().forEach(sp => grid.append(spreadEl(sp.l, sp.r)));
+      body.append(grp('Copertina, esterno (retro e fronte)', spreadEl('cb','cf')), grp('Pagine interne, come le vedi a libretto aperto', grid));
     }
   } else {
     const sides = impose();
-    body.append(textEl('tip', isOne()
+    setTip(isOne()
       ? T('Stampa questo foglio su un solo lato. La linea rosa tratteggiata è il taglio, da fare solo al centro. Le pagine in alto sono capovolte apposta: si raddrizzano quando il foglio è piegato. I segni agli angoli e sulle pieghe mostrano dove tagliare e dove piegare.')
-      : T('Stampa fronte-retro nell\'ordine che vedi qui: {s} facciate su {f} fogli. I segni agli angoli mostrano dove tagliare, quelli sulla piega dove piegare. Piega ogni foglio a metà: i fogli di un gruppo si incastrano uno dentro l\'altro, il primo all\'esterno. Poi cuci ogni gruppo alla copertina.', {s:sides.length, f:sides.length/2})));
+      : T('Stampa fronte-retro nell\'ordine che vedi qui: {s} facciate su {f} fogli. I segni agli angoli mostrano dove tagliare, quelli sulla piega dove piegare. Piega ogni foglio a metà: i fogli di un gruppo si incastrano uno dentro l\'altro, il primo all\'esterno. Poi cuci ogni gruppo alla copertina.', {s:sides.length, f:sides.length/2}));
     const list = el('div','sheetlist');
     sides.forEach((sd,i) => {
       const c = el('div','sidecard'), h = el('h3');
@@ -2994,9 +3035,16 @@ function renderDesk(){
 let fxOpen = false, inspKey = null;
 function sizeBig(){
   const {pw,ph} = dims(), J = joinFor(state.sel), mobile = window.matchMedia('(max-width:1000px)').matches;
-  const panelW = Math.max(200, ($('#insp').clientWidth || 340) - 28);
-  const targetH = clamp(innerHeight*(mobile ? .34 : .38), 170, 460);
-  const w = Math.min(targetH*pw/ph, J ? panelW/2 - 2 : panelW);
+  let w;
+  if(mobile){
+    const panelW = Math.max(200, ($('#insp').clientWidth || 340) - 28);
+    const targetH = clamp(innerHeight*.34, 170, 460);
+    w = Math.min(targetH*pw/ph, J ? panelW/2 - 2 : panelW);
+  } else {
+    const availW = Math.max(200, ($('#inspHead').clientWidth || 400) - 36);
+    const availH = Math.max(170, ($('#insp').clientHeight || 500) - 150);
+    w = Math.min(availH*pw/ph, J ? availW/2 - 2 : availW);
+  }
   $('#inspHead').style.setProperty('--bigW', Math.round(w)+'px');
 }
 function fxHTML(i, s){
@@ -3053,6 +3101,13 @@ function renderInspector(){
   if(J){ const sp = el('div','spread'); sp.append(renderPage(J.l,'big'), renderPage(J.r,'big')); host.append(sp); }
   else host.append(renderPage(key,'big'));
   head.append(host);
+  const nsl = J ? 1 : (P.layout==='framed' ? ((P.two || P.slots[1]) ? 2 : 1) : SLOT_COUNT[P.layout]);
+  if(nsl>0){
+    const cur = J ? [J.d.slot] : P.slots.slice(0, nsl);
+    let pi = cur.findIndex(x => !x); if(pi<0) pi = 0;
+    const ub = el('button','btn primary bigbtn'); ub.type = 'button'; ub.dataset.act = 'pick'; ub.dataset.i = pi;
+    ub.innerHTML = '<svg class="ic" viewBox="0 0 11 10" aria-hidden="true"><path d="M5 0h1v1h-1zM4 1h3v1h-3zM3 2h5v1h-5zM2 3h7v1h-7zM5 4h1v1h-1zM5 5h1v1h-1zM5 6h1v1h-1zM0 7h1v1h-1zM10 7h1v1h-1zM0 8h1v1h-1zM10 8h1v1h-1zM0 9h11v1h-11z"/></svg><span>'+T('Carica immagine')+'</span>'; head.append(ub);
+  }
 
   let html = '';
   if(!J && (P.layout==='framed' || P.layout==='full')){
@@ -3108,6 +3163,7 @@ function select(key){
   document.querySelectorAll('.page.thumb').forEach(p => p.classList.toggle('sel', p.dataset.key===key));
   renderInspector();
   if(window.matchMedia('(max-width:1000px)').matches) setView('edit');
+  else { const t = document.querySelector('.page.thumb.sel'); if(t && t.scrollIntoView) t.scrollIntoView({inline:'nearest', block:'nearest'}); }
 }
 /* Ridisegna la pagina e, se è unita, anche l'altra metà */
 function touch(key, skipBig){
@@ -3497,7 +3553,7 @@ window.addEventListener('keydown', e => {
 window.addEventListener('beforeunload', e => { if(state.dirty){ e.preventDefault(); e.returnValue = ''; } });
 
 /* ---------- Lingua ---------- */
-const SKIP_TR = '#deskBody,#inspHead,#inspBody,#printRoot,script,style,b,#sum,#modeNote,#qrNote,#status,#notice,#per,#sigs,#font,#tfont,#qrTopFont,#qrBotFont,#qrPage,#lang';
+const SKIP_TR = '#deskBody,#inspHead,#inspBody,#printRoot,script,style,b,#sum,#modeNote,#qrNote,#status,#notice,#per,#sigs,#font,#tfont,#qrTopFont,#qrBotFont,#qrPage,#lang,#deskTip';
 const origText = new WeakMap(), normKey = s => s.replace(/\s+/g,' ').trim();
 function translateStatic(){
   const w = document.createTreeWalker($('.appui'), NodeFilter.SHOW_TEXT);
@@ -3550,6 +3606,17 @@ function setLang(l){
 }
 $('#lang').addEventListener('change', e => setLang(e.target.value));
 document.querySelectorAll('.flag').forEach(b => b.addEventListener('click', () => setLang(b.dataset.l)));
+
+/* ---------- Pannello sinistro a icone ---------- */
+const LP = $('#lp');
+function railOpen(sec){
+  const cur = (sec && LP.dataset.cur===sec) ? '' : (sec || '');
+  LP.dataset.cur = cur; LP.classList.toggle('open', !!cur);
+  LP.querySelectorAll('details.sec').forEach(d => { const on = d.dataset.sec===cur; d.classList.toggle('cur', on); if(on) d.open = true; });
+  document.querySelectorAll('.rb').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sec===cur)));
+  sizeBig();
+}
+document.querySelectorAll('.rb').forEach(b => b.addEventListener('click', () => railOpen(b.dataset.sec)));
 
 /* ---------- Le tendine ricordano se erano aperte ---------- */
 const OPEN_KEY = 'cipensoio-tendine';
